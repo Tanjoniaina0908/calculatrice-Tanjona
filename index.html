@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculatrice scientifique</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        .calculator {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+        input {
+            margin-bottom: 10px;
+            padding: 10px;
+            font-size: 18px;
+        }
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+        button {
+            padding: 10px;
+            font-size: 18px;
+            border: none;
+            background-color: #e0e0e0;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #d0d0d0;
+        }
+        .equation {
+            background-color: rgb(31, 66, 223);
+        }
+        .equation:hover {
+            background-color: rgb(31, 66, 223);
+        }
+        .operator {
+            background-color: #f0ad4e;
+        }
+        .operator:hover {
+            background-color: #ec971f;
+        }
+        #equals {
+            background-color: #5cb85c;
+            color: white;
+        }
+        #equals:hover {
+            background-color: #449d44;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <input type="text" id="display" readonly>
+        <div class="buttons">
+            <button onclick="clearDisplay()">C</button>
+            <button onclick="appendToDisplay(Math.sqrt(''))">√</button>
+            <button onclick="appendToDisplay('**')" class="operator">^</button>
+            <button onclick="appendToDisplay('/')" class="operator">/</button>
+            <button onclick="deleteLast()">⌫</button>
+
+            <button onclick="appendToDisplay('9')">9</button>
+            <button onclick="appendToDisplay('8')">8</button>
+            <button onclick="appendToDisplay('7')">7</button>
+            <button onclick="appendToDisplay('*')" class="operator">*</button>
+
+            <button onclick="appendToDisplay('6')">6</button>
+            <button onclick="appendToDisplay('5')">5</button>
+            <button onclick="appendToDisplay('4')">4</button>
+            <button onclick="appendToDisplay('-')" class="operator">-</button>
+            
+            <button onclick="appendToDisplay('3')">3</button>
+            <button onclick="appendToDisplay('2')">2</button>
+            <button onclick="appendToDisplay('1')">1</button>
+            <button onclick="appendToDisplay('+')" class="operator">+</button>   
+
+            <button onclick="appendToDisplay(Math.PI)">π</button>          
+            <button onclick="appendToDisplay('0')">0</button>
+            <button onclick="appendToDisplay('.')">.</button>
+            <button id="equals" onclick="calculate()">=</button>
+
+            <button onclick="appendToDisplay('sin(')" class="equation">sin</button>
+            <button onclick="appendToDisplay('cos(')" class="equation">cos</button>
+            <button onclick="appendToDisplay('tan(')" class="equation">tan</button>
+            <button onclick="appendToDisplay('integrate()')">∫</button>
+
+            <button onclick="appendToDisplay('(' )">(</button>
+            <button onclick="appendToDisplay( ')')">)</button>
+            
+        </div>
+    </div>
+
+    <script>
+        // function appendToDisplay(value) {
+        //     document.getElementById('display').value += value;
+        // }
+        function appendToDisplay(value) {
+    let display = document.getElementById('display');
+    let lastChar = display.value.slice(-1); // Récupère le dernier caractère
+
+    // Liste des opérateurs
+    let operators = ['+', '-', '*', '/'];
+
+    // Vérifie si deux opérateurs sont tapés à la suite
+    if (operators.includes(lastChar) && operators.includes(value)) {
+        return; // Bloque l'ajout
+    }
+    if(value ==='('){
+        if (display.value === ''|| operators.uncludes(lastChar)){
+            display.value += value; // Ajoute normalement
+        }
+        return;
+    }
+
+    //Permet d'ajouter une parenthèse fermante seulement  si elle a une parenthèse ouvrante avant
+    if (value === ')'){
+        let openParentheses = (display.value.match(/\(/g) || []).length;
+        let closeParentheses = (display.value.match(/\)/g) || []).length;
+        if (openParentheses > closeParentheses){
+            display.value +=value;
+        }
+        return
+    }
+
+    // Ajoute normalement les autres caractères (nombres, fonctions, etc.)
+    display.value += value;
+        }
+
+
+        function clearDisplay() {
+            document.getElementById('display').value = '';
+        }
+
+        function deleteLast() {
+            let display = document.getElementById('display');
+            display.value = display.value.slice(0, -1);
+        }
+
+        function integrate(func, a, b, n = 1000) {
+            let h = (b - a) / n;
+            let sum = 0;
+            for (let i = 0; i < n; i++) {
+                let x1 = a + i * h;
+                let x2 = a + (i + 1) * h;
+                sum += (eval(func.replace(/x/g, x1)) + eval(func.replace(/x/g, x2))) * h / 2;
+            }
+            return sum;
+        }
+
+        function calculate() {
+            // try: essaie d'évaluer (eval()) l'expression entrée par l'utilisateur
+            try {
+                let display = document.getElementById('display');
+                // display.value = eval(display.value);
+                let expression = display.value;
+
+                //Remplacer les fonctions trigonométrique en degrés par Math.sin(),Math.cos(),Math.tan() en radians 
+                expression =  expression.replace(/(sin|cos|tan)\(([^)]+)?\)/g, function(Math,func,arg){
+                    // Si aucune valeur n'est donnée, utiliser 0 comme valeur par défaut
+                    if (!arg) {
+                        arg = '0'; // Valeur par défaut
+                    }
+
+                    //Remplacer Math.PI par le nombre réel de PI
+                    arg = arg.replace(/Math\.PI/g, "Math.PI").Math;
+
+                    return "Math." + func + "(Math.PI/180 * ("+ arg +"))"; //conversion des degrés en radians
+                })
+                    //Remplacer sqrt (par Math.sqrt(
+                    .replace(/sqrt\(/g, "Math.sqrt(") 
+                    // Remplacer ** par Math.pow
+                    .replace(/(\d+)\*\*(\d+)/g, function(match, base, exponent) {
+                      return "Math.pow(" + base + "," + exponent + ")";
+                  })
+                  //Remplacer integrate( par une fonction d'intégration)
+                  .replace(/integrate\(([^,]+),([^,]+),([^)]+)\)/g, function(match, func, a, b) {
+                      return "integrate('" + func + "'," + a + "," + b + ")";
+                    })
+                // Evaluer l'expression modifiée           
+                display.value = eval(expression);
+            } catch (error) {
+                // catch permet d'afficher un erreur si l'utilisateur fait une erreur
+                display.value = 'Error';
+            }
+        }
+    </script>
+</body>
+</html>
