@@ -170,19 +170,18 @@
                 let expression = display.value;
 
                 //Remplacer les fonctions trigonométrique en degrés par Math.sin(),Math.cos(),Math.tan() en radians 
-                expression =  expression.replace(/(sin|cos|tan)\(([^)]+)?\)/g, function(Math,func,arg){
+                expression =  expression.replace(/(Math\.sin|Math\.cos|Math\.tan)\(([^)]+)?\)/g, function(_,func,arg){
                     // Si aucune valeur n'est donnée, utiliser 0 comme valeur par défaut
-                    if (!arg) {
-                        arg = '0'; // Valeur par défaut
-                    }
+                    if (!arg) arg ='0' ; // Valeur par défaut
+
 
                     //Remplacer Math.PI par le nombre réel de PI
                     arg = arg.replace(/Math\.PI/g, "Math.PI").Math;
 
-                    return "Math." + func + "(Math.PI/180 * ("+ arg +"))"; //conversion des degrés en radians
+                    return func + "(Math.PI/180 * ("+ arg +"))"; //conversion des degrés en radians
                 })
                     //Remplacer sqrt (par Math.sqrt(
-                    .replace(/sqrt\(/g, "Math.sqrt(") 
+                    .replace(/Math.sqrt\(/g, "Math.sqrt(") 
                     // Remplacer ** par Math.pow
                     .replace(/(\d+)\*\*(\d+)/g, function(match, base, exponent) {
                       return "Math.pow(" + base + "," + exponent + ")";
